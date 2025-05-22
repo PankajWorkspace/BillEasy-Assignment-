@@ -3,15 +3,15 @@ const Review = require("../model/reviewSchema");
 
 exports.addBook = async (req, res) => {
   try {
-    const { title, author, genre, description, content, bookId, rating } =
+    const { title, author, genre, description, content, bookId } =
       req.body;
 
     const existing = await Book.findOne({ bookId });
-    if (existing) {
-      return res
-        .status(400)
-        .json({ error: "Book with this bookId already exists" });
-    }
+    // if (existing) {
+    //   return res
+    //     .status(400)
+    //     .json({ error: "Book with this bookId already exists" });
+    // }
 
     // Create new book
     const newBook = new Book({
@@ -21,7 +21,6 @@ exports.addBook = async (req, res) => {
       description,
       content,
       bookId,
-      rating,
     });
 
     await newBook.save();
@@ -37,31 +36,29 @@ exports.getBookById = async (req, res) => {
   try {
     const bookId = req.params.id;
 
-    // Get pagination info from query string
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
 
-    // Step 1: Find the book
-    const book = await Book.findById(bookId);
+    const book = await Book.find({ bookId });
 
     if (!book) {
       return res.status(404).json({ error: "Book not found" });
     }
 
-    // Step 2: Get paginated reviews for this book
     const reviews = await Review.find({ _id: { $in: book.reviews } })
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 });
 
-    // Step 3: Get total count of reviews
-    const totalReviews = await Review.countDocuments({ _id: { $in: book.reviews } });
+    const totalReviews = await Review.countDocuments({
+      _id: { $in: book.reviews },
+    });
 
     res.status(200).json({
       book: {
-        ...book.toObject(),
-        reviews, // override with paginated reviews
+        ...book,
+        reviews,
       },
       pagination: {
         page,
@@ -76,7 +73,48 @@ exports.getBookById = async (req, res) => {
   }
 };
 
-exports.searchBooks = async(req, res) => {
+exports.getBooks = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 2; // Default 10 books per page
+    const skip = (page - 1) * limit;
+
+    // Optional filters mention in the assignment
+    const filter = {};
+    if (req.query.author) {
+      filter.author = req.query.author;
+    }
+    if (req.query.genre) {
+      filter.genre = req.query.genre;
+    }
+
+    const totalBooks = await Book.countDocuments(filter);
+
+    const books = await Book.find(filter)
+      .skip(skip)
+      .limit(limit)
+      .populate({
+        path: "reviews",
+        options: { limit: 5, sort: { createdAt: -1 } }, // latest 5 reviews
+      })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      books,
+      pagination: {
+        page,
+        limit,
+        totalBooks,
+        totalPages: Math.ceil(totalBooks / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching books:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.searchBooks = async (req, res) => {
   try {
     const query = req.query.q;
 
@@ -95,11 +133,13 @@ exports.searchBooks = async(req, res) => {
       ],
     }).populate("reviews");
 
+    if(books.length <= 0 ){
+      return res.status(200).json({message: "No book found for this author or title"})
+    }
+
     res.status(200).json({ results: books });
   } catch (error) {
     console.error("Error searching books:", error);
     res.status(500).json({ error: "Server error" });
   }
-}
-
-module.exports = { searchBooks };
+};

@@ -3,51 +3,34 @@ const Review = require("../module/model/reviewSchema");
 const User = require("../module/model/userSchema");
 
 const generateID = async (type) => {
-  if (type === "user") {
-    const user = await User.findOne({ userId: { $exists: true, $ne: null } })
-      .sort({ userId: -1 })
-      .limit(1);
+  let id;
 
-    console.log("Found user:", user);
+  const modelMap = {
+    user: { model: User, prefix: "User" },
+    book: { model: Book, prefix: "Book" },
+    review: { model: Review, prefix: "Review" },
+  };
 
-    let nextUserId;
+  const config = modelMap[type];
+  if (!config) throw new Error("Invalid type for ID generation");
 
-    if (user && user.userId) {
-      const lastIdNumber = parseInt(user.userId.slice(4), 10);
-      nextUserId = `User00${String(lastIdNumber + 1).padStart(2, "0")}`;
-    } else {
-      nextUserId = "User0001";
-    }
-  } else if (type === "book") {
-    const book = await Book.findOne({ bookId: { $exists: true, $ne: null } })
-      .sort({ bookId: -1 })
-      .limit(1);
+  const latest = await config.model
+    .findOne({ [`${type}Id`]: { $exists: true, $ne: null } })
+    .sort({ [`${type}Id`]: -1 })
+    .limit(1);
 
-    let nextBookId;
+  let lastIdNumber = 0;
 
-    if (book && book.bookId) {
-      const lastIdNumber = parseInt(book.bookId.slice(4), 10);
-      nextBookId = `Book00${String(lastIdNumber + 1).padStart(2, "0")}`;
-    } else {
-      nextBookId = "Book0001";
-    }
-  } else if (type === "review") {
-    const review = await Review.findOne({
-      reviewId: { $exists: true, $ne: null },
-    })
-      .sort({ reviewId: -1 })
-      .limit(1);
-
-    let nextReviewId;
-
-    if (review && review.reviewId) {
-      const lastIdNumber = parseInt(review.reviewId.slice(4), 10);
-      nextReviewId = `Review00${String(lastIdNumber + 1).padStart(2, "0")}`;
-    } else {
-      nextReviewId = "Review0001";
+  if (latest && latest[`${type}Id`]) {
+    const match = latest[`${type}Id`].match(/\d+$/);
+    if (match) {
+      lastIdNumber = parseInt(match[0], 10);
     }
   }
-  return nextClientCode;
+
+  id = `${config.prefix}${String(lastIdNumber + 1).padStart(4, "0")}`;
+  return id;
 };
+
 
 module.exports = generateID

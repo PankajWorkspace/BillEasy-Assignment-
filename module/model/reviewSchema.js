@@ -4,10 +4,11 @@ const DB = require("../../dbConnect/dbConnect");
 const reviewSchema = new mongoose.Schema(
   {
     comments: { type: String },
-    userId: { type: String },
-    bookId: { type: String },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    bookId: { type: mongoose.Schema.Types.ObjectId, ref: "Book" },
     content: { type: String },
     reviewId: { type: String },
+    rating: { type: Number },
   },
   { timestamps: true }
 );

@@ -2,7 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+require("dotenv").config();
 const app = express();
+const PORT = process.env.PORT || 5000
 
 // Middleware
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -27,10 +29,12 @@ const reviewInfoRoutes = require('./module/route/reviewRoute')
 app.use('/user', userRoutes);
 
 // book
-// app.use('/book', bookRoutes);
+app.use('/book', bookRoutes);
 
 // review
 app.use('/review', reviewInfoRoutes);
 
 
-module.exports = app; 
+app.listen(PORT, ()=>{
+  console.log(`Server is running on ${PORT}`)
+})

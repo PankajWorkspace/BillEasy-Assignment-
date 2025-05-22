@@ -1,5 +1,6 @@
 const express = require("express");
 const jwt = require('jsonwebtoken');
+const User = require("../module/model/userSchema")
 
 require('dotenv').config();
 
@@ -24,7 +25,7 @@ exports.verifyToken = async function (req, res, next) {
         }
 
         if (decoded.type === 'user') {
-            const user = await kycLogin.findOne({ mobileNumber: decoded.mobileNumber, dependentName:decoded.dependentName });
+            const user = await User.findOne({ mobileNumber: decoded.mobileNumber, dependentName:decoded.dependentName });
             if (!user) {
                 return res.status(401).json({ message: 'kyc user not found' });
             }

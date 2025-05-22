@@ -9,8 +9,8 @@ const bookSchema = new mongoose.Schema(
     description: { type: String },
     content: { type: String },
     bookId: { type: String },
-    rating: { type: String },
-    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }]
+    averageRating: { type: Number },
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
   },
   { timestamps: true }
 );
