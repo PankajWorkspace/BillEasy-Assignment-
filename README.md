@@ -43,8 +43,7 @@ nodemon app.js
 ---
 
 ### 5. Project Structure
-````
-
+```
 BILLEASY ASSIGNMENT/
 │
 ├── dbConnect/
@@ -55,12 +54,12 @@ BILLEASY ASSIGNMENT/
 │ │ ├── BookController.js
 │ │ ├── ReviewController.js
 │ │ └── UserController.js
-│ │
+│
 │ ├── model/
 │ │ ├── bookSchema.js
 │ │ ├── reviewSchema.js
 │ │ └── userSchema.js
-│ │
+│
 │ └── route/
 │ ├── bookRoute.js
 │ ├── reviewRoute.js
@@ -68,7 +67,7 @@ BILLEASY ASSIGNMENT/
 │
 ├── service/
 │ └── utils/
-│ | ├── rating.js
+│   └── rating.js
 │ ├── generateId.js
 │ └── token.js
 │
