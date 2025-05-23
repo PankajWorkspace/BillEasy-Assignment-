@@ -19,7 +19,7 @@ It allows users to review books, update or delete their reviews, and automatical
 
 ### 1. Clone the repository:
 
-````bash
+```bash
 git clone <your-repo-url>
 
 ---
